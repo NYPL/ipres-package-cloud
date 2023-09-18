@@ -264,3 +264,73 @@ def test_unclear_package(good_package):
     result = lint_ft.lint_package(bad_package)
 
     assert result == "needs review"
+
+# Functional tests
+def test_lint_valid_package(monkeypatch, good_package, capsys, tmp_path):
+    """Run entire script with valid ER"""
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "../bin/lint_ft.py",
+            "--package",
+            str(good_package),
+            "--log_folder",
+            str(tmp_path),
+        ],
+    )
+
+    lint_ft.main()
+
+    stdout = capsys.readouterr().out
+
+    assert f"packages are valid: {[str(good_package.name)]}" in stdout
+
+
+def test_lint_invalid_package(monkeypatch, good_package, capsys, tmp_path):
+    """Run entire script with invalid ER"""
+
+    bad_package = good_package
+
+    md_folder = bad_package / "metadata" / "submissionDocumentation"
+    md_folder.mkdir()
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "../bin/lint_er.py",
+            "--package",
+            str(bad_package),
+            "--log_folder",
+            str(tmp_path),
+        ],
+    )
+
+    lint_ft.main()
+
+    stdout = capsys.readouterr().out
+
+    assert f"packages are invalid: {[str(bad_package.name)]}" in stdout
+
+def test_lint_needs_review_package(monkeypatch, good_package, capsys, tmp_path):
+    bad_package = good_package
+
+    md_fp = bad_package / "metadata" / "rclone.log"
+    md_fp.unlink()
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "../bin/lint_er.py",
+            "--package",
+            str(bad_package),
+            "--log_folder",
+            str(tmp_path),
+        ],
+    )
+
+    lint_ft.main()
+
+    stdout = capsys.readouterr().out
+
+    assert f"They may be passed without change after review: {[bad_package.name]}" in stdout
