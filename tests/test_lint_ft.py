@@ -248,8 +248,8 @@ def test_invalid_package(good_package):
     """Test that package returns 'invalid' when failing some tests"""
     bad_package = good_package
 
-    bag_folder = bad_package / "metadata" / "submissionDocumentation"
-    bag_folder.mkdir()
+    bad_folder = bad_package / "metadata" / "submissionDocumentation"
+    bad_folder.mkdir()
 
     result = lint_ft.lint_package(bad_package)
 
